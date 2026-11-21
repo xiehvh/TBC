@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+from typing import Any, Callable
+
 from bcsfe import core
+from bcsfe.cli import color, dialog_creator
 
 
 def max_catfood(save_file: core.SaveFile):
@@ -92,34 +95,57 @@ def max_labyrinth_medals(save_file: core.SaveFile):
         )
 
 
-# def max_catfruit(save_file: core.SaveFile):
-#     for id in range(len(save_file.catfruit)):
-#         save_file.catfruit[id] = core.core_data.max_value_manager.get_new(
-#             core.MaxValueType.CATFRUIT
-#         )
-
-
 def max_normal_tickets(save_file: core.SaveFile):
     save_file.normal_tickets = core.core_data.max_value_manager.normal_tickets
 
 
-# def max_all(save_file: core.SaveFile):
-# maxes = core.core_data.max_value_manager
-# features: dict[str, Callable[[core.SaveFile], None]] = {
-#     "catfood": max_catfood,
-#     "xp": max_xp,
-#     "normal_tickets": max_normal_tickets,
-#     "rare_tickets": max_rare_tickets,
-#     "platinum_tickets": max_plat_tickets,
-#     "legend_tickets": max_legend_tickets,
-#     "platinum_shards": max_plat_shards,
-#     "np": max_np,
-#     "leadership": max_leadership,
-#     "battle_items": max_battle_items,
-#     "catseyes": max_catseyes,
-#     "catamins": max_catamins,
-#     "labyrinth_medals": max_labyrinth_medals,
-#     "100_million_ticket": max_100_million_ticket,
-#     "treasure_chests": max_treasure_chests,
-# }
-# TODO: finish
+def max_catfruit(save_file: core.SaveFile):
+    if save_file.game_version < 110400:
+        return
+
+    max_catfruit = core.core_data.max_value_manager.catfruit_new
+    for id in range(len(save_file.catfruit)):
+        save_file.catfruit[id] = max_catfruit
+
+
+MAX_ALL_OPTIONS: list[tuple[str, Callable[[core.SaveFile], None]]] = [
+    ("catfood", max_catfood),
+    ("xp", max_xp),
+    ("normal_tickets", max_normal_tickets),
+    ("rare_tickets", max_rare_tickets),
+    ("platinum_tickets", max_plat_tickets),
+    ("legend_tickets", max_legend_tickets),
+    ("platinum_shards", max_plat_shards),
+    ("np", max_np),
+    ("leadership", max_leadership),
+    ("battle_items", max_battle_items),
+    ("catfruit", max_catfruit),
+    ("catseyes", max_catseyes),
+    ("catamins", max_catamins),
+    ("labyrinth_medals", max_labyrinth_medals),
+    ("100_million_tickets", max_100_million_ticket),
+    ("treasure_chests", max_treasure_chests),
+]
+
+
+def localize_or(key: str, fallback: str, **kwargs: Any) -> str:
+    text = core.localize(key, **kwargs)
+    if text == key:
+        return fallback
+    return text
+
+
+def max_all(save_file: core.SaveFile):
+    names = [core.localize(key) for key, _ in MAX_ALL_OPTIONS]
+    selected = dialog_creator.multi_select_indexes_key(
+        names, localize_or("max_all_dialog", "Select the items to max out:")
+    )
+    if not selected:
+        return
+
+    for id in selected:
+        MAX_ALL_OPTIONS[id][1](save_file)
+
+    color.color_print(
+        localize_or("max_all_success", "Successfully maxed the selected items")
+    )
