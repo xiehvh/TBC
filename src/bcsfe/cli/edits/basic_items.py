@@ -1,9 +1,15 @@
 from __future__ import annotations
+
+import datetime
 import random
 from typing import Optional
+
 from bcsfe import core
-from bcsfe.cli import dialog_creator, color, edits
+from bcsfe.cli import color, dialog_creator, edits
 from bcsfe.core.game.catbase.gatya_item import GatyaItemCategory
+
+# Highest energy limit the game allows (1200 as of version 14.7+).
+MAX_ENERGY = 1200
 
 
 class BasicItems:
@@ -189,6 +195,22 @@ class BasicItems:
             save_file.leadership,
             dialog_creator.MaxValue.i16(core.core_data.max_value_manager.leadership),
         )
+
+    @staticmethod
+    def edit_energy(save_file: core.SaveFile):
+        original_energy = save_file.current_energy
+        save_file.current_energy = dialog_creator.edit_int_raw(
+            BasicItems.get_name(None, "energy"),
+            save_file.current_energy,
+            dialog_creator.MaxValue.always_cap(MAX_ENERGY),
+        )
+        if save_file.current_energy == original_energy:
+            return
+
+        # Old penalty timestamps stop energy from recovering, and can be
+        # behind by more than a day, which the game flags as an error.
+        save_file.energy_penalty_timestamp = datetime.datetime.now().timestamp()
+        color.color_print_key("energy_success")
 
     @staticmethod
     def edit_battle_items(save_file: core.SaveFile):

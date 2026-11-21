@@ -57,6 +57,7 @@ class FeatureHandler:
                 "platinum_shards": edits.basic_items.BasicItems.edit_platinum_shards,
                 "np": edits.basic_items.BasicItems.edit_np,
                 "leadership": edits.basic_items.BasicItems.edit_leadership,
+                "energy": edits.basic_items.BasicItems.edit_energy,
                 "battle_items": edits.basic_items.BasicItems.edit_battle_items,
                 "battle_items_endless": edits.basic_items.BasicItems.edit_battle_items_endless,
                 "catseyes": edits.basic_items.BasicItems.edit_catseyes,
