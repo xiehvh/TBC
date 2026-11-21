@@ -186,7 +186,7 @@ def range_multi_input_raw(dialog: str, max: MaxValue, min: int = 0) -> list[int]
     usr_input = usr_input.strip()
 
     if usr_input.lower() == core.localize("all").lower():
-        return list(range(min, max.max))
+        return list(range(min, max.max + 1))
 
     nums: list[int] = []
     for part in usr_input.split(" "):

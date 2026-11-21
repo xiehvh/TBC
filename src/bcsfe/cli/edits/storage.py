@@ -181,13 +181,13 @@ def add_special_skills(save_file: core.SaveFile):
             items.append(item)
 
     space = get_storage_space(storage)
-    if len(options) > len(storage):
+    if len(items) > len(storage):
         color.color_print_key(
-            "too_many_skills_selected", max=len(storage), current=len(options)
+            "too_many_skills_selected", max=len(storage), current=len(items)
         )
         return
 
-    needs = len(options) - space
+    needs = len(items) - space
     if needs > 0:
         color.color_print_key("need_x_more_space", needs=needs)
         return

@@ -81,7 +81,7 @@ def max_treasure_chests(save_file: core.SaveFile):
 
 
 def max_catamins(save_file: core.SaveFile):
-    for id in range(len(save_file.catseyes)):
+    for id in range(len(save_file.catamins)):
         save_file.catamins[id] = core.core_data.max_value_manager.catamins
 
 

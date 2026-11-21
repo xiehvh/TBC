@@ -7,6 +7,20 @@ import datetime
 from bcsfe.core.io.config import ConfigKey
 
 
+def datetime_to_timestamp(date: datetime.datetime) -> float:
+    try:
+        return date.timestamp()
+    except (OSError, OverflowError, ValueError):
+        return 0.0
+
+
+def timestamp_to_datetime(timestamp: float) -> datetime.datetime:
+    try:
+        return datetime.datetime.fromtimestamp(timestamp)
+    except (OSError, OverflowError, ValueError):
+        return datetime.datetime(1970, 1, 1)
+
+
 class SaveError(Exception):
     pass
 
@@ -2287,7 +2301,7 @@ class SaveFile:
             "month": self.month,
             "day": self.day,
             "timestamp": self.timestamp,
-            "date": self.date.timestamp(),
+            "date": datetime_to_timestamp(self.date),
             "ui1": self.ui1,
             "stamp_value_save": self.stamp_value_save,
             "ui2": self.ui2,
@@ -2318,8 +2332,8 @@ class SaveFile:
             "uil1": self.uil1,
             "moneko_bonus": self.moneko_bonus,
             "daily_reward_initialized": self.daily_reward_initialized,
-            "date_2": self.date_2.timestamp(),
-            "date_3": self.date_3.timestamp(),
+            "date_2": datetime_to_timestamp(self.date_2),
+            "date_3": datetime_to_timestamp(self.date_3),
             "ui0": self.ui0,
             "stage_unlock_cat_value": self.stage_unlock_cat_value,
             "show_ending_value": self.show_ending_value,
@@ -2344,7 +2358,7 @@ class SaveFile:
             "get_event_data": self.get_event_data,
             "achievements": self.achievements,
             "os_value": self.os_value,
-            "date_4": self.date_4.timestamp(),
+            "date_4": datetime_to_timestamp(self.date_4),
             "player_id": self.player_id,
             "order_ids": self.order_ids,
             "g_timestamp": self.g_timestamp,
@@ -2625,7 +2639,7 @@ class SaveFile:
         save_file.month = data.get("month", 0)
         save_file.day = data.get("day", 0)
         save_file.timestamp = data.get("timestamp", 0.0)
-        save_file.date = datetime.datetime.fromtimestamp(data.get("date", 0))
+        save_file.date = timestamp_to_datetime(data.get("date", 0))
         save_file.ui1 = data.get("ui1", 0)
         save_file.stamp_value_save = data.get("stamp_value_save", 0)
         save_file.ui2 = data.get("ui2", 0)
@@ -2660,8 +2674,8 @@ class SaveFile:
         save_file.uil1 = data.get("uil1", [])
         save_file.moneko_bonus = data.get("moneko_bonus", [])
         save_file.daily_reward_initialized = data.get("daily_reward_initialized", [])
-        save_file.date_2 = datetime.datetime.fromtimestamp(data.get("date_2", 0))
-        save_file.date_3 = datetime.datetime.fromtimestamp(data.get("date_3", 0))
+        save_file.date_2 = timestamp_to_datetime(data.get("date_2", 0))
+        save_file.date_3 = timestamp_to_datetime(data.get("date_3", 0))
         save_file.ui0 = data.get("ui0", 0)
         save_file.stage_unlock_cat_value = data.get("stage_unlock_cat_value", 0)
         save_file.show_ending_value = data.get("show_ending_value", 0)
@@ -2688,7 +2702,7 @@ class SaveFile:
         save_file.get_event_data = data.get("get_event_data", False)
         save_file.achievements = data.get("achievements", [])
         save_file.os_value = data.get("os_value", 0)
-        save_file.date_4 = datetime.datetime.fromtimestamp(data.get("date_4", 0))
+        save_file.date_4 = timestamp_to_datetime(data.get("date_4", 0))
         save_file.player_id = data.get("player_id", "")
         save_file.order_ids = data.get("order_ids", [])
         save_file.g_timestamp = data.get("g_timestamp", 0.0)

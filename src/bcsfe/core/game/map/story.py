@@ -867,7 +867,7 @@ class StoryChapters:
                 save_file, chapter_type
             ).treasure_group_names
             if treasure_group_data is None or treasure_group_names is None:
-                return
+                continue
             treasure_group_names_new: list[str] = []
             for i in range(len(treasure_group_data)):
                 treasure_group_names_new.append(treasure_group_names[i])
