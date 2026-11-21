@@ -965,24 +965,24 @@ class StoryChapters:
 
     @staticmethod
     def itf_timed_score_input() -> tuple[int, int] | None:
-        inp = dialog_creator.str_input_key("itf_timed_score_dialog")
-        if inp is None:
-            return None
+        mx = dialog_creator.MaxValue.i32(
+            core.core_data.max_value_manager.itf_timed_score
+        )
+        while True:
+            inp = dialog_creator.str_input_key("itf_timed_score_dialog")
+            if inp is None:
+                return None
 
-        parts = inp.split("-", maxsplit=1)
+            parts = inp.split("-", maxsplit=1)
 
-        parts_i: list[int] = []
-        for part in parts:
-            if not part.isdigit():
-                return StoryChapters.itf_timed_score_input()
-            score = int(part)
-            mx = dialog_creator.MaxValue.i32(
-                core.core_data.max_value_manager.itf_timed_score
-            )
-            score = mx.clamp(score)
-            parts_i.append(score)
-
-        return min(parts_i), max(parts_i) + 1
+            parts_i: list[int] = []
+            for part in parts:
+                if not part.strip().isdigit():
+                    break
+                parts_i.append(mx.clamp(int(part)))
+            else:
+                if parts_i:
+                    return min(parts_i), max(parts_i) + 1
 
     @staticmethod
     def edit_itf_timed_scores_whole_chapters(
