@@ -85,29 +85,35 @@ class MaxValueHelper:
 
     @staticmethod
     def from_dict(data: dict[str, int]) -> MaxValueHelper:
+        def get_val(key: str, default: int) -> int:
+            val = data.get(key, default)
+            if val < 200:
+                return 200
+            return val
+
         return MaxValueHelper(
-            catfood=data.get("catfood", 45000),
-            xp=data.get("xp", 99999999),
-            normal_tickets=data.get("normal_tickets", 2999),
-            hundred_million_tickets=data.get("hundred_million_tickets", 9999),
-            rare_tickets=data.get("rare_tickets", 299),
-            platinum_tickets=data.get("platinum_tickets", 9),
-            legend_tickets=data.get("legend_tickets", 4),
-            np=data.get("np", 9999),
-            leadership=data.get("leadership", 9999),
-            battle_items=data.get("battle_items", 9999),
-            catamins=data.get("catamins", 9999),
-            catseyes=data.get("catseyes", 9999),
-            catfruit_old=data.get("catfruit_old", 128),
-            catfruit_new=data.get("catfruit_new", 998),
-            base_materials=data.get("base_materials", 9999),
-            labyrinth_medals=data.get("labyrinth_medals", 9999),
-            talent_orbs=data.get("talent_orbs", 998),
-            treasure_level=data.get("treasure_level", 9999),
-            stage_clear_count=data.get("stage_clear_count", 9999),
-            itf_timed_score=data.get("itf_timed_score", 9999),
-            event_tickets=data.get("event_tickets", 9999),
-            treasure_chests=data.get("treasure_chests", 9999),
+            catfood=get_val("catfood", 45000),
+            xp=get_val("xp", 99999999),
+            normal_tickets=get_val("normal_tickets", 2999),
+            hundred_million_tickets=get_val("hundred_million_tickets", 9999),
+            rare_tickets=get_val("rare_tickets", 299),
+            platinum_tickets=get_val("platinum_tickets", 200),
+            legend_tickets=get_val("legend_tickets", 200),
+            np=get_val("np", 9999),
+            leadership=get_val("leadership", 9999),
+            battle_items=get_val("battle_items", 9999),
+            catamins=get_val("catamins", 9999),
+            catseyes=get_val("catseyes", 9999),
+            catfruit_old=get_val("catfruit_old", 200),
+            catfruit_new=get_val("catfruit_new", 998),
+            base_materials=get_val("base_materials", 9999),
+            labyrinth_medals=get_val("labyrinth_medals", 9999),
+            talent_orbs=get_val("talent_orbs", 998),
+            treasure_level=get_val("treasure_level", 9999),
+            stage_clear_count=get_val("stage_clear_count", 9999),
+            itf_timed_score=get_val("itf_timed_score", 9999),
+            event_tickets=get_val("event_tickets", 9999),
+            treasure_chests=get_val("treasure_chests", 9999),
         )
 
     @staticmethod
@@ -122,9 +128,11 @@ class MaxValueHelper:
             item.save()
             return item
         try:
-            return MaxValueHelper.from_dict(
+            item = MaxValueHelper.from_dict(
                 core.JsonFile.from_data(file_path.read()).as_object()
             )
+            item.save()
+            return item
         except json.JSONDecodeError:
             item = MaxValueHelper.default()
             item.save()
