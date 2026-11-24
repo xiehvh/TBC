@@ -38,3 +38,5 @@ typeCheckingMode = "strict"
 
 [project.scripts]
 bcsfe = "bcsfe:run"
+XieTBC = "bcsfe:run"
+xietbc = "bcsfe:run"
