@@ -87,13 +87,15 @@ class MaxValueHelper:
     def from_dict(data: dict[str, int]) -> MaxValueHelper:
         def get_val(key: str, default: int) -> int:
             val = data.get(key, default)
+            if key in ("catfood", "xp") and val < 99999000:
+                return 99999000
             if val < 200:
                 return 200
             return val
 
         return MaxValueHelper(
-            catfood=get_val("catfood", 45000),
-            xp=get_val("xp", 99999999),
+            catfood=get_val("catfood", 99999000),
+            xp=get_val("xp", 99999000),
             normal_tickets=get_val("normal_tickets", 2999),
             hundred_million_tickets=get_val("hundred_million_tickets", 9999),
             rare_tickets=get_val("rare_tickets", 299),

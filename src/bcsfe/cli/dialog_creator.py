@@ -513,6 +513,15 @@ def str_input_key(dialog: str, escape: bool = True, **kwargs: Any) -> str | None
     return str_input_raw(core.localize(dialog, escape, **kwargs))
 
 
+def parse_int_input(val: str) -> int:
+    val_clean = val.strip().lower()
+    if val_clean.endswith("k"):
+        return int(float(val_clean[:-1]) * 1000)
+    if val_clean.endswith("m"):
+        return int(float(val_clean[:-1]) * 1000000)
+    return int(val_clean)
+
+
 def int_input_raw(
     dialog: str,
     _max: MaxValue,
@@ -528,7 +537,7 @@ def int_input_raw(
         if inp == quit_key:
             return None
         try:
-            inp_i = int(inp)
+            inp_i = parse_int_input(inp)
         except ValueError:
             color.color_print_key("invalid_input_int", max=_max.max, min=_min)
             continue
