@@ -121,7 +121,7 @@ class LocalManager:
         self.all_properties: dict[str, tuple[str, str]] = {}
         self.en_properties: dict[str, tuple[str, str]] = {}
         self.en_properties_path = LocalManager.get_locale_folder("en")
-        self.authors: list[str] = ["fieryhenry"]
+        self.authors: list[str] = ["XieHvH"]
         self.name: str = "English"
         self.parse()
         if self.locale == "en":
@@ -264,7 +264,7 @@ class LocalManager:
 
         if metadata_path.exists():
             data = core.JsonFile.from_path(metadata_path).as_object()
-            self.authors = data.get("authors") or ["fieryhenry"]
+            self.authors = data.get("authors") or ["XieHvH"]
             self.name = data.get("name") or "English"
 
         if self.locale != "en":

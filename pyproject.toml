@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "bcsfe"
-authors = [{ name = "fieryhenry" }]
+authors = [{ name = "XieHvH" }]
 description = "A save file editor for The Battle Cats"
 license = "GPL-3.0-or-later"
 readme = "README.md"

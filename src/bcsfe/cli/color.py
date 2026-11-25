@@ -55,6 +55,31 @@ class ColorHex(enum.Enum):
             return ""
 
 
+RAINBOW = "@rainbow"
+
+# 7 bright colours cycled per character, plus the ANSI blink attribute
+RAINBOW_COLORS = [
+    "#FF0000",
+    "#FF7F00",
+    "#FFFF00",
+    "#00FF00",
+    "#00BFFF",
+    "#4B0082",
+    "#9400D3",
+]
+
+
+def __rainbow(text: str) -> str:
+    esc = "\x1b["
+    blink = esc + "5m"
+    terminator = esc + "0m"
+    out = blink
+    for i, char in enumerate(text):
+        color = RAINBOW_COLORS[i % len(RAINBOW_COLORS)]
+        out += __stylize(char, __fg(color))
+    return out + terminator
+
+
 def __parse_color(color_name: str) -> str:
     if not color_name:
         return ""
@@ -86,6 +111,8 @@ def __parse_color(color_name: str) -> str:
         return theme_handler.get_warning_color()
     if second_char == "s" and third_char == "u":
         return theme_handler.get_success_color()
+    if second_char == "r" and third_char == "b":
+        return RAINBOW
     return theme_handler.get_theme_color(color_name[1:])
 
 
@@ -167,6 +194,10 @@ def colorize(text: str) -> str:
     for txt, color in text_data:
         if not color:
             out += txt
+            continue
+
+        if color == RAINBOW:
+            out += __rainbow(txt)
             continue
 
         out += __stylize(txt, __fg(color))

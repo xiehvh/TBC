@@ -2,17 +2,15 @@
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/fieryhenry)
 
-[![LiberaPay](https://liberapay.com/assets/widgets/donate.svg)](https://liberapay.com/fieryhenry)
+[![LiberaPay](https://liberapay.com/assets/widgets/donate.svg)](https://liberapay.com/XieHvH)
 
 BCSFE is a python command line save editor for The Battle Cats.
-
-Please submit issues and pull requests on [codeberg](https://codeberg.org/fieryhenry/BCSFE-Python)
 
 Join the [discord server](https://discord.gg/DvmMgvn5ZB) if you want to suggest
 new features, report bugs or get help on how to use the editor (please read the
 below tutorials first before asking for help).
 
-XieMagic YT XieHvH TG XieHvH DC XieHvH
+YT XieHvH TG XieHvH DC XieHvH
 
 ### Localization
 

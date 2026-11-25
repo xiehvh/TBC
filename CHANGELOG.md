@@ -216,7 +216,7 @@ count are now done separately.
 
 ### Changed
 
-- Game data repo is now at <https://git.battlecatsmodding.org/fieryhenry/BCData>
+- Game data repo is now at <https://git.battlecatsmodding.org/XieHvH/BCData>
 
 - Game data is now downloaded and saved all at once, rather than file by file which should speed up some features
 

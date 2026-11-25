@@ -72,7 +72,7 @@ class Config:
             ConfigKey.SEPARATE_CAT_EDIT_OPTIONS: True,
             ConfigKey.STRICT_BAN_PREVENTION: False,
             ConfigKey.MAX_REQUEST_TIMEOUT: 30,
-            ConfigKey.GAME_DATA_REPO: "https://git.battlecatsmodding.org/fieryhenry/BCData/raw/branch/main/metadata.json",
+            ConfigKey.GAME_DATA_REPO: "https://git.battlecatsmodding.org/XieHvH/BCData/raw/branch/main/metadata.json",
             ConfigKey.FORCE_LANG_GAME_DATA: False,
             ConfigKey.CLEAR_TUTORIAL_ON_LOAD: True,
             ConfigKey.REMOVE_BAN_MESSAGE_ON_LOAD: True,
@@ -115,7 +115,7 @@ class Config:
 
     def get_game_data_repo(self, fix_old_repo: bool = True) -> str:
         if fix_old_repo and self.get_str(ConfigKey.GAME_DATA_REPO) in [
-            "https://raw.githubusercontent.com/fieryhenry/BCData/master/",
+            "https://raw.githubusercontent.com/XieHvH/BCData/master/",
             "https://git.fyhenry.uk/henry/BCData/raw/branch/main/info.json",
         ]:
             self.set(

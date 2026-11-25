@@ -317,21 +317,86 @@ class BasicItems:
 
         if save_file.game_version < 110400:
             max_value = core.core_data.max_value_manager.catfruit_old
+            cumulative = True
             max = dialog_creator.CumulativeMax.new(
                 dialog_creator.MaxValue.i32(max_value)
             )
         else:
-            max_value = dialog_creator.MaxValue.i32(
-                core.core_data.max_value_manager.catfruit_new
-            )
-            max = max_value
+            max_value = core.core_data.max_value_manager.catfruit_new
+            cumulative = False
+            max = dialog_creator.MaxValue.i32(max_value)
 
         names = names[: len(save_file.catfruit)]
 
-        values = dialog_creator.edit_ints_key(
-            "catfruit", names, save_file.catfruit, max
+        all_fruit_label = core.core_data.local_manager.get_key("all_fruit")
+        options = [
+            core.localize("value", name=name, value=value)
+            for name, value in zip(names, save_file.catfruit)
+        ]
+        options.append(all_fruit_label)
+
+        entries = dialog_creator.multi_select_indexes_key(
+            options,
+            "input_many",
+            min=1,
+            max=len(options),
         )
-        save_file.catfruit = values
+        if not entries:
+            return
+
+        all_index = len(options) - 1
+        if all_index in entries:
+            BasicItems._fill_all_catfruit(save_file, max_value, cumulative)
+            return
+
+        if len(entries) == 1:
+            dialog_creator.edit_individual(
+                save_file.catfruit, max, entries, names
+            )
+        else:
+            dialog_creator.single_select_key(
+                dialog_creator.Actions[None]
+                .new()
+                .add_new_key(
+                    "individually",
+                    lambda _: dialog_creator.edit_individual(
+                        save_file.catfruit, max, entries, names
+                    ),
+                )
+                .add_new_key(
+                    "edit_all_at_once",
+                    lambda _: dialog_creator.edit_many(
+                        save_file.catfruit,
+                        max,
+                        entries,
+                        "catfruit",
+                        names,
+                    ),
+                ),
+                "individual_or_all_at_once",
+                group="catfruit",
+            )
+
+    @staticmethod
+    def _fill_all_catfruit(
+        save_file: core.SaveFile, max_value: int, cumulative: bool
+    ):
+        count = len(save_file.catfruit)
+        if count == 0:
+            return
+        if cumulative:
+            each = max_value // count
+            for id in range(count):
+                save_file.catfruit[id] = each
+        else:
+            for id in range(count):
+                save_file.catfruit[id] = max_value
+        color.color_print_key(
+            "value_changed",
+            name=core.core_data.local_manager.get_key("all_fruit"),
+            value=max_value,
+            escape=False,
+        )
 
     @staticmethod
     def set_restart_pack(save_file: core.SaveFile):
