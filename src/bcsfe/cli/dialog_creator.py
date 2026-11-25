@@ -157,7 +157,7 @@ def range_basic_parse(usr_input: str, max: MaxValue, min: int = 0) -> list[int] 
         if part.isdigit():
             int_i = int(part)
             if int_i > max.max or int_i < min:
-                color.color_print_key("invalid_input_int", min=min, max=max.max)
+                color.color_print_key("invalid_input_int", min=min, max=max.display())
                 return None
             nums.append(int(part))
         elif "-" in part:
@@ -193,7 +193,7 @@ def range_multi_input_raw(dialog: str, max: MaxValue, min: int = 0) -> list[int]
         if part.isdigit():
             int_i = int(part)
             if int_i > max.max or int_i < min:
-                color.color_print_key("invalid_input_int", min=min, max=max.max)
+                color.color_print_key("invalid_input_int", min=min, max=max.display())
                 continue
             nums.append(int(part))
         elif "-" in part:
@@ -207,7 +207,7 @@ def range_multi_input_raw(dialog: str, max: MaxValue, min: int = 0) -> list[int]
                 color.color_print_key("invalid_range", val=part)
                 continue
             if max_i > max.max or min_i < min:
-                color.color_print_key("invalid_input_int", min=min, max=max.max)
+                color.color_print_key("invalid_input_int", min=min, max=max.display())
                 continue
 
             nums.extend(list(range(min_i, max_i + 1)))
@@ -412,11 +412,23 @@ def basic_keys_pick_key_entry(
     )
 
 
+UNLIMITED_LABEL = "Xie"
+
+
 class MaxValue:
-    def __init__(self, max: int, bits: int, show: bool = True):
+    def __init__(
+        self, max: int, bits: int, show: bool = True, label: str | None = None
+    ):
         self.max = max
         self.show = show
         self.bits = bits
+        self.label = label
+
+    def display(self) -> str:
+        """What to show the user as the maximum value."""
+        if self.label is not None:
+            return self.label
+        return str(self.max)
 
     def hide_max(self) -> MaxValue:
         self.show = False
@@ -429,7 +441,9 @@ class MaxValue:
     @staticmethod
     def specific(max: int, bits: int) -> MaxValue:
         if core.core_data.config.get_bool(core.ConfigKey.DISABLE_MAXES):
-            return MaxValue.none(bits).hide_max()
+            unlimited = MaxValue.none(bits)
+            unlimited.label = UNLIMITED_LABEL
+            return unlimited
         return MaxValue(max, bits)
 
     @staticmethod
@@ -477,7 +491,7 @@ def edit_int_raw(item_name: str, current_value: int, max: MaxValue) -> int:
         key = "input_no_max"
 
     dialog = core.localize(
-        key, name=item_name, value=current_value, max=max.max, escape=False
+        key, name=item_name, value=current_value, max=max.display(), escape=False
     )
 
     val = int_input_raw(dialog, max, auto_clamp=True)
@@ -539,14 +553,14 @@ def int_input_raw(
         try:
             inp_i = parse_int_input(inp)
         except ValueError:
-            color.color_print_key("invalid_input_int", max=_max.max, min=_min)
+            color.color_print_key("invalid_input_int", max=_max.display(), min=_min)
             continue
 
         if inp_i < _min or inp_i > _max.max:
             if auto_clamp:
                 inp_i = min(max(_min, inp_i), _max.max)
             else:
-                color.color_print_key("invalid_input_int", max=_max.max, min=_min)
+                color.color_print_key("invalid_input_int", max=_max.display(), min=_min)
                 continue
 
         return inp_i
@@ -720,7 +734,7 @@ def edit_many(
     else:
         _max = max
     val = int_input_key(
-        "input_generic", _max, name=group_name, auto_clamp=True, max=_max.max
+        "input_generic", _max, name=group_name, auto_clamp=True, max=_max.display()
     )
     if val is None:
         return

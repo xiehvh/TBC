@@ -431,7 +431,7 @@ class BasicItems:
             _max,
             count=len(indexes),
             auto_clamp=True,
-            max=_max.max,
+            max=_max.display(),
         )
         if val is None:
             return
