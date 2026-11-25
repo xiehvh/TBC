@@ -231,13 +231,55 @@ class BattleItems:
         if item_names is None:
             return
         current_values = [item.amount for item in self.items]
-        values = dialog_creator.edit_ints_raw(
-            group_name,
-            item_names,
-            current_values,
-            dialog_creator.MaxValue.i32(core.core_data.max_value_manager.battle_items),
+        max = dialog_creator.MaxValue.i32(
+            core.core_data.max_value_manager.battle_items
         )
-        for i, value in enumerate(values):
+
+        options = [
+            core.localize("value", name=name, value=value)
+            for name, value in zip(item_names, current_values)
+        ]
+        options.append(core.core_data.local_manager.get_key("all_items"))
+
+        all_index = len(options) - 1
+        entries = dialog_creator.multi_select_collapse_raw(
+            options, core.localize("input_many", min=1, max=len(options)), all_index
+        )
+        if not entries:
+            return
+
+        if all_index in entries:
+            entries = list(range(len(item_names)))
+
+        if len(entries) == 1:
+            dialog_creator.edit_individual(
+                current_values, max, entries, item_names
+            )
+        else:
+            dialog_creator.single_select_key(
+                dialog_creator.Actions[None]
+                .new()
+                .add_new_key(
+                    "individually",
+                    lambda _: dialog_creator.edit_individual(
+                        current_values, max, entries, item_names
+                    ),
+                )
+                .add_new_key(
+                    "edit_all_at_once",
+                    lambda _: dialog_creator.edit_many(
+                        current_values,
+                        max,
+                        entries,
+                        group_name,
+                        item_names,
+                    ),
+                ),
+                "individual_or_all_at_once",
+                group=group_name,
+            )
+
+        for i, value in enumerate(current_values):
             self.items[i].amount = value
 
     def edit_endless_items(self, save_file: core.SaveFile):

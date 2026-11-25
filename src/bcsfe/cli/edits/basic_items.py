@@ -282,15 +282,52 @@ class BasicItems:
                 )
             names.append(name)
 
-        values = dialog_creator.edit_ints_key(
-            "treasure_chests",
-            names,
-            save_file.treasure_chests,
-            dialog_creator.MaxValue.i32(
-                core.core_data.max_value_manager.treasure_chests
-            ),
+        max = dialog_creator.MaxValue.i32(
+            core.core_data.max_value_manager.treasure_chests
         )
-        save_file.treasure_chests = values
+        options = [
+            core.localize("value", name=name, value=value)
+            for name, value in zip(names, save_file.treasure_chests)
+        ]
+        options.append(core.core_data.local_manager.get_key("all_items"))
+
+        all_index = len(options) - 1
+        entries = dialog_creator.multi_select_collapse_raw(
+            options, core.localize("input_many", min=1, max=len(options)), all_index
+        )
+        if not entries:
+            return
+
+        if all_index in entries:
+            entries = list(range(len(names)))
+
+        if len(entries) == 1:
+            dialog_creator.edit_individual(
+                save_file.treasure_chests, max, entries, names
+            )
+        else:
+            dialog_creator.single_select_key(
+                dialog_creator.Actions[None]
+                .new()
+                .add_new_key(
+                    "individually",
+                    lambda _: dialog_creator.edit_individual(
+                        save_file.treasure_chests, max, entries, names
+                    ),
+                )
+                .add_new_key(
+                    "edit_all_at_once",
+                    lambda _: dialog_creator.edit_many(
+                        save_file.treasure_chests,
+                        max,
+                        entries,
+                        "treasure_chests",
+                        names,
+                    ),
+                ),
+                "individual_or_all_at_once",
+                group="treasure_chests",
+            )
 
     @staticmethod
     def edit_catfruit(save_file: core.SaveFile):
@@ -333,16 +370,13 @@ class BasicItems:
         ]
         options.append(all_fruit_label)
 
-        entries = dialog_creator.multi_select_indexes_key(
-            options,
-            "input_many",
-            min=1,
-            max=len(options),
+        all_index = len(options) - 1
+        entries = dialog_creator.multi_select_collapse_raw(
+            options, core.localize("input_many", min=1, max=len(options)), all_index
         )
         if not entries:
             return
 
-        all_index = len(options) - 1
         if all_index in entries:
             BasicItems._all_fruit_menu(save_file, max)
             return

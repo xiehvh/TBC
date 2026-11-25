@@ -302,6 +302,69 @@ def multi_select_entries_raw(
             return ids
 
 
+def multi_select_collapse_raw(
+    options: list[str], dialog: str, all_index: int | None = None
+) -> list[int] | None:
+    """Multi-select that narrows the menu down to what has been picked.
+
+    Picking a number hides every other entry, so the list shrinks to the
+    selection. Entering 0 brings the full list back. An empty line accepts
+    the current selection.
+    """
+    if not options:
+        return None
+    if len(options) == 1:
+        return [0]
+
+    selected: list[int] = []
+    quit_key = core.localize("quit_key")
+    back_label = core.core_data.local_manager.get_key("back_to_all")
+
+    while True:
+        visible = selected if selected else list(range(len(options)))
+
+        lines: list[str] = []
+        for i in visible:
+            lines.append(f" {i + 1}. <@t>{options[i]}</>")
+        if selected:
+            lines.append(f" 0. <@t>{back_label}</>")
+
+        color.color_print("\n".join(lines))
+        inp = color.color_input(dialog).strip()
+
+        if inp == quit_key:
+            return None
+
+        if inp == "":
+            if selected:
+                return selected
+            continue
+
+        if inp == "0":
+            selected = []
+            continue
+
+        if not inp.isdigit():
+            color.color_print_key("invalid_input")
+            continue
+
+        picked = int(inp) - 1
+        if picked < 0 or picked >= len(options):
+            color.color_print_key("invalid_input")
+            continue
+
+        if all_index is not None and picked == all_index:
+            return [i for i in range(len(options)) if i != all_index]
+
+        if picked in selected:
+            selected.remove(picked)
+        else:
+            selected.append(picked)
+
+        if not selected:
+            selected = []
+
+
 def single_select_raw(actions: Actions[T], dialog: str) -> T | None:
     if actions.max() == 0:
         return None
