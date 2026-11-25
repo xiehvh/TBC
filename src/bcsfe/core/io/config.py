@@ -63,7 +63,7 @@ class Config:
             ConfigKey.UPDATE_TO_BETA: False,
             ConfigKey.LOCALE: "en",
             ConfigKey.SHOW_MISSING_LOCALE_KEYS: False,
-            ConfigKey.DISABLE_MAXES: False,
+            ConfigKey.DISABLE_MAXES: True,
             ConfigKey.MAX_BACKUPS: 50,
             ConfigKey.THEME: "default",
             ConfigKey.RESET_CAT_DATA: True,

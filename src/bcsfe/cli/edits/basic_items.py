@@ -316,15 +316,13 @@ class BasicItems:
                 )
 
         if save_file.game_version < 110400:
-            max_value = core.core_data.max_value_manager.catfruit_old
             cumulative = True
             max = dialog_creator.CumulativeMax.new(
-                dialog_creator.MaxValue.i32(max_value)
+                dialog_creator.MaxValue.none(31)
             )
         else:
-            max_value = core.core_data.max_value_manager.catfruit_new
             cumulative = False
-            max = dialog_creator.MaxValue.i32(max_value)
+            max = dialog_creator.MaxValue.none(31)
 
         names = names[: len(save_file.catfruit)]
 
@@ -346,7 +344,7 @@ class BasicItems:
 
         all_index = len(options) - 1
         if all_index in entries:
-            BasicItems._fill_all_catfruit(save_file, max_value, cumulative)
+            BasicItems._all_fruit_menu(save_file, max)
             return
 
         if len(entries) == 1:
@@ -378,23 +376,73 @@ class BasicItems:
             )
 
     @staticmethod
-    def _fill_all_catfruit(
-        save_file: core.SaveFile, max_value: int, cumulative: bool
+    def _all_fruit_menu(
+        save_file: core.SaveFile,
+        max: dialog_creator.CumulativeMax | dialog_creator.MaxValue,
     ):
         count = len(save_file.catfruit)
         if count == 0:
             return
-        if cumulative:
-            each = max_value // count
-            for id in range(count):
-                save_file.catfruit[id] = each
+
+        names = [
+            core.core_data.local_manager.get_key("unknown_catfruit_name", id=i)
+            for i in range(count)
+        ]
+        matatabi_names = core.Matatabi(save_file).get_names()
+        if matatabi_names is not None:
+            for i, name in enumerate(matatabi_names[:count]):
+                if name is not None:
+                    names[i] = name
+
+        all_indexes = list(range(count))
+
+        dialog_creator.single_select_key(
+            dialog_creator.Actions[None]
+            .new()
+            .add_new_key(
+                "all_fruit_individual",
+                lambda _: dialog_creator.edit_individual(
+                    save_file.catfruit, max, all_indexes, names
+                ),
+            )
+            .add_new_key(
+                "all_fruit_uniform",
+                lambda _: BasicItems._all_fruit_uniform(
+                    save_file, max, names, all_indexes
+                ),
+            ),
+            "all_fruit_mode",
+        )
+
+    @staticmethod
+    def _all_fruit_uniform(
+        save_file: core.SaveFile,
+        max: dialog_creator.CumulativeMax | dialog_creator.MaxValue,
+        names: list[str],
+        indexes: list[int],
+    ):
+        if isinstance(max, dialog_creator.CumulativeMax):
+            _max = max.get(save_file.catfruit, indexes)
         else:
-            for id in range(count):
-                save_file.catfruit[id] = max_value
+            _max = max
+
+        val = dialog_creator.int_input_key(
+            "all_fruit_uniform_input",
+            _max,
+            count=len(indexes),
+            auto_clamp=True,
+            max=_max.max,
+        )
+        if val is None:
+            return
+
+        for id in indexes:
+            save_file.catfruit[id] = _max.clamp(val)
+
         color.color_print_key(
             "value_changed",
             name=core.core_data.local_manager.get_key("all_fruit"),
-            value=max_value,
+            value=val,
             escape=False,
         )
 
