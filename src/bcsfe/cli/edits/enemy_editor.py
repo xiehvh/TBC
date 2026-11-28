@@ -165,7 +165,7 @@ class EnemyEditor:
             return None
 
         labels = [label for label, _ in locations]
-        selected = dialog_creator.multi_select_indexes_key(labels, dialog="select_map")
+        selected = dialog_creator.multi_select_indexes_key(labels, dialog="select_enemy_maps")
         if selected is None:
             return None
 

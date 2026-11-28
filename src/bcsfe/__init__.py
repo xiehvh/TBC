@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-__version__ = "3.6.4"
+__version__ = "3.6.5"
 
 __app_name__ = "bcsfe"
 

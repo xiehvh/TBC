@@ -262,6 +262,7 @@ def multi_select_entries_raw(
         return [(0, options[0])]
 
     offset = 1
+    min = offset
     actions = (
         Actions[list[tuple[int, str]]]
         .new()
@@ -269,9 +270,8 @@ def multi_select_entries_raw(
         .add_new_key("all", lambda _: list(enumerate(options)))
     )
 
-    ids: list[tuple[int, str]] = []
-
     quit_key = core.localize("quit_key")
+    all_key_str = core.localize("all").lower().strip()
 
     while True:
         actions.display()
@@ -279,27 +279,49 @@ def multi_select_entries_raw(
         if inp == quit_key:
             return None
 
-        inps = inp.split(" ")
+        inp_clean = inp.strip()
+        if not inp_clean:
+            continue
 
-        for inp in inps:
-            if not inp.isdigit():
-                color.color_print_key("invalid_input_int", min=min, max=actions.max())
+        if inp_clean.lower() == "all" or inp_clean.lower() == all_key_str:
+            return list(enumerate(options))
+
+        inps = [part.strip() for part in inp_clean.split(" ") if part.strip()]
+        if not inps:
+            continue
+
+        ids: list[tuple[int, str]] = []
+        has_error = False
+
+        for part in inps:
+            if part.lower() == "all" or part.lower() == all_key_str:
+                ids.extend(list(enumerate(options)))
                 continue
 
-            inp_i = int(inp)
+            if not part.isdigit():
+                color.color_print_key("invalid_input_int", min=min, max=actions.max())
+                has_error = True
+                break
+
+            inp_i = int(part)
             inp_i -= offset
             if inp_i < 0:
                 color.color_print_key("invalid_input_int", min=min, max=actions.max())
+                has_error = True
                 break
 
             action = actions.get_rebase(inp_i)
             if action is None:
                 color.color_print_key("invalid_input_int", min=min, max=actions.max())
+                has_error = True
                 break
 
             ids.extend(action[0].run(action[1]))
-        else:
-            return ids
+
+        if has_error:
+            continue
+
+        return ids
 
 
 def multi_select_collapse_raw(
