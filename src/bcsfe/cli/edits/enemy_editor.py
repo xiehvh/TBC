@@ -1,4 +1,6 @@
 from __future__ import annotations
+import os
+import re
 from typing import Optional
 from bcsfe import core
 from bcsfe.cli import color, dialog_creator
@@ -46,6 +48,7 @@ class EnemyEditor:
             .add_new_key("select_enemies_all", lambda _: self.get_all_enemies())
             .add_new_key("select_enemies_id", lambda _: self.select_id())
             .add_new_key("select_enemies_name", lambda _: self.select_name())
+            .add_new_key("select_enemies_map", lambda _: self.select_map())
             .add_new_key(
                 "select_enemies_invalid", lambda _: self.get_all_invalid_enemies()
             ),
@@ -154,6 +157,101 @@ class EnemyEditor:
             if name.lower() in enemy_name.lower():
                 enemies.append(enemy)
         return enemies
+
+    def select_map(self) -> list[core.Enemy] | None:
+        locations = self.get_enemy_locations()
+        if not locations:
+            color.color_print_key("enemy_locations_not_found")
+            return None
+
+        labels = [label for label, _ in locations]
+        selected = dialog_creator.multi_select_indexes_key(labels, dialog="select_map")
+        if selected is None:
+            return None
+
+        enemies: list[core.Enemy] = []
+        for index in selected:
+            for enemy in locations[index][1]:
+                if enemy not in enemies:
+                    enemies.append(enemy)
+        return enemies
+
+    def get_enemy_locations(self) -> list[tuple[str, list[core.Enemy]]]:
+        total = len(self.save_file.enemy_guide)
+        locations: list[tuple[str, list[core.Enemy]]] = []
+
+        story = [
+            ("EoC Ch.1", r"^stageNormal0\.csv$"),
+            ("EoC Ch.2", r"^stageNormal1_\d+\.csv$"),
+            ("EoC Ch.3", r"^stageNormal2_\d+\.csv$"),
+            ("ItF Ch.1", r"^stageSpace07_\d+\.csv$"),
+            ("ItF Ch.2", r"^stageSpace08_\d+\.csv$"),
+            ("ItF Ch.3", r"^stageSpace09_\d+\.csv$"),
+            ("CotC Ch.1", r"^stageW04_\d+\.csv$"),
+            ("CotC Ch.2", r"^stageW05_\d+\.csv$"),
+            ("CotC Ch.3", r"^stageW06_\d+\.csv$"),
+        ]
+        for label, pattern in story:
+            enemies = EnemyEditor.scan_stage_files(pattern, total)
+            if enemies:
+                locations.append((label, enemies))
+
+        for map_id in range(49):
+            enemies = EnemyEditor.scan_stage_files(
+                r"^stageRN%03d_\d+\.csv$" % map_id, total
+            )
+            if enemies:
+                locations.append(("SOL %03d" % map_id, enemies))
+
+        return locations
+
+    @staticmethod
+    def scan_stage_files(pattern: str, total: int) -> list[core.Enemy]:
+        dir = core.Path.get_data_folder().add("game_data")
+        found: set[int] = set()
+
+        versions = core.GameDataGetter.get_all_downloaded_versions()
+        for cc in core.CountryCode.get_all():
+            for version in versions.get(cc, []):
+                data_local = (
+                    dir.add(cc.get_code()).add(version.to_string()).add("DataLocal")
+                )
+                if not data_local.exists():
+                    continue
+                try:
+                    file_names = os.listdir(data_local.path)
+                except OSError:
+                    continue
+                for file_name in file_names:
+                    if not re.match(pattern, file_name):
+                        continue
+                    path = data_local.add(file_name)
+                    if not path.exists():
+                        continue
+                    data = path.read()
+                    if data is None:
+                        continue
+                    found |= EnemyEditor.read_enemy_ids(data, total)
+
+        return [core.Enemy(id) for id in sorted(found)]
+
+    @staticmethod
+    def read_enemy_ids(data, total: int) -> set[int]:
+        found: set[int] = set()
+        lines = data.to_str().split("\n")
+        for i, line in enumerate(lines):
+            if i > 60:
+                break
+            line = line.strip()
+            if not line or line.startswith("//"):
+                continue
+            cell = line.split(",")[0].strip()
+            if not cell.isdigit():
+                continue
+            enemy_id = int(cell)
+            if 0 <= enemy_id < total:
+                found.add(enemy_id)
+        return found
 
     @staticmethod
     def from_save_file(
